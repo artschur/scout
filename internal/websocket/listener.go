@@ -8,13 +8,13 @@ import (
 
 type Listener struct {
 	connections []*websocket.Conn
-	metricsChan chan metrics.MetricsReceived
+	MetricsChan chan metrics.MetricsReceived
 }
 
 func NewListener(metricsChan chan metrics.MetricsReceived) *Listener {
 	return &Listener{
 		connections: make([]*websocket.Conn, 0),
-		metricsChan: metricsChan,
+		MetricsChan: metricsChan,
 	}
 }
 
@@ -50,7 +50,7 @@ func (l *Listener) Listen() {
 				if err != nil {
 					break
 				}
-				l.metricsChan <- metrics
+				l.MetricsChan <- metrics
 			}
 		}(conn)
 	}
