@@ -10,14 +10,12 @@ import (
 )
 
 type MetricsHandler struct {
-	wsListener websocket.Listener
+	wsListener *websocket.Listener
 }
 
 func NewMetricsHandler(listener *websocket.Listener) *MetricsHandler {
-	go listener.Listen()
-
 	return &MetricsHandler{
-		wsListener: *listener,
+		wsListener: listener,
 	}
 }
 
