@@ -7,8 +7,7 @@ import (
 	"net/http"
 )
 
-func AddRoutes(mux *http.ServeMux) {
-	metricsChan := make(chan metrics.MetricsReceived)
+func AddRoutes(mux *http.ServeMux, metricsChan chan metrics.MetricsReceived) {
 	webhookListener := websocket.NewListener(metricsChan)
 
 	metricsHandler := handler.NewMetricsHandler(webhookListener)
