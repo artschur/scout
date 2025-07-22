@@ -20,7 +20,6 @@ func main() {
 
 	metricsDisplayer := metrics.NewMetricsDisplay(metricsChan)
 
-	metricsDisplayer.LogMetrics()
 	server := &http.Server{
 		Addr:    ":8082",
 		Handler: mux,
@@ -28,6 +27,7 @@ func main() {
 
 	go func() {
 		log.Println("Server starting on :8082")
+		metricsDisplayer.LogMetrics()
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("ListenAndServe error: %v", err)
 		}
