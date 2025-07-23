@@ -7,10 +7,10 @@ import (
 )
 
 func AddRoutes(mux *http.ServeMux, metricsChan chan metrics.MetricsReceived) {
-	webhookListener := websocket.NewListener(metricsChan)
+	webhookListener := websocket.NewHub(metricsChan)
 
 	metricsHandler := NewMetricsHandler(webhookListener)
 
-	mux.HandleFunc("GET /client", metricsHandler.NewMetricListener)
+	mux.HandleFunc("GET /client", metricsHandler.NewMetricSubscriber)
 	mux.HandleFunc("GET /send", metricsHandler.NewPublisher)
 }

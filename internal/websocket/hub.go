@@ -2,28 +2,27 @@ package websocket
 
 import (
 	"go-observability-tool/internal/metrics"
-
-	"github.com/gorilla/websocket"
 )
 
-type Listener struct {
-	connections []*websocket.Conn
+type Hub struct {
+	connections []*Connection
+
 	MetricsChan chan metrics.MetricsReceived
 }
 
-func NewListener(metricsChan chan metrics.MetricsReceived) *Listener {
-	return &Listener{
-		connections: make([]*websocket.Conn, 0),
+func NewHub(metricsChan chan metrics.MetricsReceived) *Hub {
+	return &Hub{
+		connections: make([]*Connection, 0),
 		MetricsChan: metricsChan,
 	}
 }
 
-func (l *Listener) AddConnection(conn *websocket.Conn) {
+func (l *Hub) AddConnection(conn *Connection) {
 	l.connections = append(l.connections, conn)
-	go func(c *websocket.Conn) {
+	go func(c *Connection) {
 		for {
 			var metrics metrics.MetricsReceived
-			err := c.ReadJSON(&metrics)
+			err := c.Conn.ReadJSON(&metrics)
 			if err != nil {
 				break
 			}
@@ -32,7 +31,7 @@ func (l *Listener) AddConnection(conn *websocket.Conn) {
 	}(conn)
 }
 
-func (l *Listener) RemoveConnection(conn *websocket.Conn) {
+func (l *Hub) RemoveConnection(conn *Connection) {
 	for i, c := range l.connections {
 		if c == conn {
 			l.connections = append(l.connections[:i], l.connections[i+1:]...)

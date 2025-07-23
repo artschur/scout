@@ -1,9 +1,9 @@
-package main
+package hub
 
 import (
 	"context"
+	observer "go-observability-tool/internal/hub"
 	"go-observability-tool/internal/metrics"
-	"go-observability-tool/internal/observer"
 	"log"
 	"net/http"
 	"os"

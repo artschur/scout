@@ -10,18 +10,13 @@ import (
 )
 
 type MetricsHandler struct {
-	wsListener *websocket.Listener
+	wsHub *websocket.Hub
 }
 
-func NewMetricsHandler(listener *websocket.Listener) *MetricsHandler {
+func NewMetricsHandler(Hub *websocket.Hub) *MetricsHandler {
 	return &MetricsHandler{
-		wsListener: listener,
+		wsHub: Hub,
 	}
-}
-
-type Publisher struct {
-	conn          *gw.Conn
-	publisherName string
 }
 
 // endpoint for metric publishers
@@ -31,27 +26,33 @@ func (h *MetricsHandler) NewPublisher(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	newPublisher := &Publisher{
-		conn:          conn,
-		publisherName: r.URL.Query().Get("name"),
-	}
-	if newPublisher.publisherName == "" {
+
+	publisherName := r.URL.Query().Get("name")
+
+	if publisherName == "" {
 		http.Error(w, "Publisher name is required", http.StatusBadRequest)
 		return
 	}
 
-	h.wsListener.AddConnection(conn)
+	newPublisher := &websocket.Connection{
+		Conn: conn,
+		IP:   r.RemoteAddr,
+		Name: publisherName,
+		Role: "publisher",
+	}
+
+	h.wsHub.AddConnection(newPublisher)
 }
 
 // endpoint for a client (dashboard) that will get metrics from other sys
-func (h *MetricsHandler) NewMetricListener(w http.ResponseWriter, r *http.Request) {
+func (h *MetricsHandler) NewMetricSubscriber(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgradeToWS(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for metric := range h.wsListener.MetricsChan {
+	for metric := range h.wsHub.MetricsChan {
 		err := conn.WriteJSON(metric)
 		if err != nil {
 			log.Printf("error sending metric to observer")
