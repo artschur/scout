@@ -1,4 +1,4 @@
-package routes
+package observer
 
 import (
 	"go-observability-tool/internal/handler"
@@ -12,6 +12,6 @@ func AddRoutes(mux *http.ServeMux, metricsChan chan metrics.MetricsReceived) {
 
 	metricsHandler := handler.NewMetricsHandler(webhookListener)
 
-	mux.HandleFunc("GET /listen", metricsHandler.NewMetricObserver)
-	mux.HandleFunc("GET /send", metricsHandler.NewSender)
+	mux.HandleFunc("GET /listen", metricsHandler.NewMetricListener)
+	mux.HandleFunc("GET /send", metricsHandler.NewPublisher)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 )
 
-func BroadcastSystemMetrics(metricsChan chan MetricsReceived) error {
+func GetSystemMetrics(metricsChan chan MetricsReceived) error {
 	ticker := time.NewTicker(500 * time.Millisecond)
 	for range ticker.C {
 		metrics, err := getSystemMetrics()

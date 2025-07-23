@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"go-observability-tool/internal/metrics"
-	"go-observability-tool/internal/routes"
+	"go-observability-tool/internal/observer"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +16,7 @@ func main() {
 	mux := http.DefaultServeMux
 
 	metricsChan := make(chan metrics.MetricsReceived)
-	routes.AddRoutes(mux, metricsChan)
+	observer.AddRoutes(mux, metricsChan)
 
 	metricsDisplayer := metrics.NewMetricsDisplay(metricsChan)
 

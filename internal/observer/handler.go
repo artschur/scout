@@ -1,4 +1,4 @@
-package handler
+package observer
 
 import (
 	"fmt"
@@ -19,7 +19,8 @@ func NewMetricsHandler(listener *websocket.Listener) *MetricsHandler {
 	}
 }
 
-func (h *MetricsHandler) NewSender(w http.ResponseWriter, r *http.Request) {
+// endpoint for metric publishers
+func (h *MetricsHandler) NewPublisher(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgradeToWS(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -29,7 +30,8 @@ func (h *MetricsHandler) NewSender(w http.ResponseWriter, r *http.Request) {
 	h.wsListener.AddConnection(conn)
 }
 
-func (h *MetricsHandler) NewMetricObserver(w http.ResponseWriter, r *http.Request) {
+// endpoint for a client (dashboard) that will get metrics from other sys
+func (h *MetricsHandler) NewMetricListener(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgradeToWS(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
