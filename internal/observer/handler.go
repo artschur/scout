@@ -19,11 +19,24 @@ func NewMetricsHandler(listener *websocket.Listener) *MetricsHandler {
 	}
 }
 
+type Publisher struct {
+	conn          *gw.Conn
+	publisherName string
+}
+
 // endpoint for metric publishers
 func (h *MetricsHandler) NewPublisher(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgradeToWS(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	newPublisher := &Publisher{
+		conn:          conn,
+		publisherName: r.URL.Query().Get("name"),
+	}
+	if newPublisher.publisherName == "" {
+		http.Error(w, "Publisher name is required", http.StatusBadRequest)
 		return
 	}
 

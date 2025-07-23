@@ -7,19 +7,21 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type SenderClient struct {
+type PublisherClient struct {
 	listenerAddress string
+	publisherName   string
 	metrics         chan metrics.MetricsReceived
 }
 
-func NewSender(listenerAddress string) *SenderClient {
-	return &SenderClient{
+func NewPublisher(listenerAddress, publisherName string) *PublisherClient {
+	return &PublisherClient{
 		listenerAddress: listenerAddress,
+		publisherName:   publisherName,
 		metrics:         make(chan metrics.MetricsReceived),
 	}
 }
 
-func (s *SenderClient) Run() {
+func (s *PublisherClient) Run() {
 	conn, err := s.connectToSender()
 	if err != nil {
 		fmt.Println("Connection error:", err)
@@ -36,7 +38,7 @@ func (s *SenderClient) Run() {
 	}
 }
 
-func (s *SenderClient) connectToSender() (*websocket.Conn, error) {
+func (s *PublisherClient) connectToSender() (*websocket.Conn, error) {
 	websocketEndpoint := fmt.Sprintf("ws://%v/send", s.listenerAddress)
 
 	conn, _, err := websocket.DefaultDialer.Dial(websocketEndpoint, nil)
