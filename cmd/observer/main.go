@@ -25,9 +25,10 @@ func main() {
 		Handler: mux,
 	}
 
+	go metricsDisplayer.LogMetrics()
+
 	go func() {
 		log.Println("Server starting on :8082")
-		metricsDisplayer.LogMetrics()
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("ListenAndServe error: %v", err)
 		}
