@@ -1,5 +1,5 @@
 # Scout
-Sentinal is an Open Source Peer-to-Peer Observability tool made in golang. 
+scout is an Open Source Peer-to-Peer Observability tool made in golang. 
 It has two binaries, one that works as a hub (receives system metrics from other connections) and a publisher, 
 which runs in the background of any machine to stream data to the hub.
 
