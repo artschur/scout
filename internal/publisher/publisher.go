@@ -30,6 +30,7 @@ func (s *PublisherClient) Run() {
 	defer conn.Close()
 
 	go metricsLoop(s.metrics)
+	defer close(s.metrics)
 	for metric := range s.metrics {
 		if err := conn.WriteJSON(metric); err != nil {
 			fmt.Println("Error sending metric:", err)
@@ -39,7 +40,7 @@ func (s *PublisherClient) Run() {
 }
 
 func (s *PublisherClient) connectToSender() (*websocket.Conn, error) {
-	websocketEndpoint := fmt.Sprintf("ws://%v/send", s.listenerAddress)
+	websocketEndpoint := fmt.Sprintf("ws://%v/send?name=%s", s.listenerAddress, s.publisherName)
 
 	conn, _, err := websocket.DefaultDialer.Dial(websocketEndpoint, nil)
 	if err != nil {

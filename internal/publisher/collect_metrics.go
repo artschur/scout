@@ -5,22 +5,22 @@ import (
 	"go-observability-tool/internal/metrics"
 	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/disk"
-	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/shirou/gopsutil/v3/net"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/mem"
+	"github.com/shirou/gopsutil/v4/net"
 )
 
-func metricsLoop(metricsChan chan metrics.MetricsReceived) error {
+func metricsLoop(metricsChan chan metrics.MetricsReceived) {
 	ticker := time.NewTicker(500 * time.Millisecond)
 	for range ticker.C {
 		metrics, err := getMetrics()
 		if err != nil {
-			return fmt.Errorf("error broadcasting metrics: %v", err)
+			fmt.Printf("Error getting metrics: %v\n", err)
+			continue
 		}
 		metricsChan <- metrics
 	}
-	return nil
 }
 
 func getMetrics() (metrics.MetricsReceived, error) {
