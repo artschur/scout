@@ -15,7 +15,7 @@ import (
 func main() {
 	mux := http.DefaultServeMux
 
-	metricsChan := make(chan metrics.MetricsReceived)
+	metricsChan := make(chan metrics.MetricsToDisplay)
 	observer.AddRoutes(mux, metricsChan)
 
 	metricsDisplayer := metrics.NewMetricsDisplay(metricsChan)

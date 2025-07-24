@@ -7,10 +7,10 @@ import (
 type Hub struct {
 	connections []*Connection
 
-	MetricsChan chan metrics.MetricsReceived
+	MetricsChan chan metrics.MetricsToDisplay
 }
 
-func NewHub(metricsChan chan metrics.MetricsReceived) *Hub {
+func NewHub(metricsChan chan metrics.MetricsToDisplay) *Hub {
 	return &Hub{
 		connections: make([]*Connection, 0),
 		MetricsChan: metricsChan,
@@ -21,12 +21,19 @@ func (l *Hub) AddConnection(conn *Connection) {
 	l.connections = append(l.connections, conn)
 	go func(c *Connection) {
 		for {
-			var metrics metrics.MetricsReceived
-			err := c.Conn.ReadJSON(&metrics)
+			var metricsReceived metrics.MetricsReceived
+			err := c.Conn.ReadJSON(&metricsReceived)
 			if err != nil {
 				break
 			}
-			l.MetricsChan <- metrics
+
+			metricsToDisplay := metrics.MetricsToDisplay{
+				MetricsReceived: metricsReceived,
+				Name:            c.Name,
+				IP:              c.IP,
+			}
+
+			l.MetricsChan <- metricsToDisplay
 		}
 	}(conn)
 }

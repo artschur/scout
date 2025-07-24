@@ -3,10 +3,10 @@ package metrics
 import "fmt"
 
 type MetricsDisplay struct {
-	metricsChan chan MetricsReceived
+	metricsChan chan MetricsToDisplay
 }
 
-func NewMetricsDisplay(metricsChan chan MetricsReceived) *MetricsDisplay {
+func NewMetricsDisplay(metricsChan chan MetricsToDisplay) *MetricsDisplay {
 	return &MetricsDisplay{
 		metricsChan: metricsChan,
 	}
@@ -18,12 +18,11 @@ func (md *MetricsDisplay) LogMetrics() {
 	}
 }
 
-func printMetric(metric MetricsReceived) {
+func printMetric(metric MetricsToDisplay) {
 	fmt.Printf(
-		"CPU: %.2f%% | Memory: %.2fMB | Disk: %.2fGB | Network: %.2fMB/s\n",
-		metric.CPUUsage,
-		metric.MemoryUsage,
-		metric.DiskUsage,
-		metric.NetworkIO,
+		"Name: %s| CPU: %.2f%% | Memory: %.2fMB\n",
+		metric.Name,
+		metric.MetricsReceived.CPUUsage,
+		metric.MetricsReceived.MemoryUsage,
 	)
 }
