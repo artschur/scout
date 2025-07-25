@@ -20,9 +20,11 @@ func (md *MetricsDisplay) LogMetrics() {
 
 func printMetric(metric MetricsToDisplay) {
 	fmt.Printf(
-		"Name: %s| CPU: %.2f%% | Memory: %.2fMB\n",
+		"Name: %s| CPU: %.2f%% | CPU Temp:%.2f°C |  Memory: %.2fMB / %.2f%%\n",
 		metric.Name,
 		metric.MetricsReceived.CPUUsage,
-		metric.MetricsReceived.MemoryUsage,
+		metric.MetricsReceived.CPUTemperature,
+		metric.MetricsReceived.MemoryUsageMB,
+		metric.MetricsReceived.MemoryPercentage,
 	)
 }

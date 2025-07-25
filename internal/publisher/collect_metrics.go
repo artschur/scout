@@ -3,12 +3,12 @@ package publisher
 import (
 	"fmt"
 	"go-observability-tool/internal/metrics"
+	"strings"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
-	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/mem"
-	"github.com/shirou/gopsutil/v4/net"
+	"github.com/shirou/gopsutil/v4/sensors"
 )
 
 func metricsLoop(metricsChan chan metrics.MetricsReceived) {
@@ -34,24 +34,23 @@ func getMetrics() (metrics.MetricsReceived, error) {
 	if err != nil {
 		return metrics.MetricsReceived{}, fmt.Errorf("error getting memory: %v", err)
 	}
-	memUsedMB := float64(vmStat.Used) / 1024 / 1024
+	memUsedMB := float64(vmStat.Used) / (1024 * 1024) // Convert bytes to MB
 
-	diskStat, err := disk.Usage("/")
+	temps, err := sensors.SensorsTemperatures()
 	if err != nil {
-		return metrics.MetricsReceived{}, fmt.Errorf("error getting disk: %v", err)
+		return metrics.MetricsReceived{}, fmt.Errorf("error getting CPU temperature: %v", err)
 	}
-	diskUsedGB := float64(diskStat.Used) / 1024 / 1024 / 1024
-
-	netIOs, err := net.IOCounters(false)
-	if err != nil {
-		return metrics.MetricsReceived{}, fmt.Errorf("error net io: %v", err)
+	var maxTdie float64
+	for _, t := range temps {
+		if strings.Contains(t.SensorKey, "tdie") && t.Temperature > maxTdie {
+			maxTdie = t.Temperature
+		}
 	}
-	netMBps := float64(netIOs[0].BytesSent+netIOs[0].BytesRecv) / 1024 / 1024
 
 	return metrics.MetricsReceived{
-		CPUUsage:    cpuPercent,
-		MemoryUsage: memUsedMB,
-		DiskUsage:   diskUsedGB,
-		NetworkIO:   netMBps,
+		CPUUsage:         cpuPercent,
+		MemoryUsageMB:    memUsedMB,
+		CPUTemperature:   maxTdie,
+		MemoryPercentage: vmStat.UsedPercent,
 	}, nil
 }
