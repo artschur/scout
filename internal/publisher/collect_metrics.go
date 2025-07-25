@@ -40,17 +40,21 @@ func getMetrics() (metrics.MetricsReceived, error) {
 	if err != nil {
 		return metrics.MetricsReceived{}, fmt.Errorf("error getting CPU temperature: %v", err)
 	}
-	var maxTdie float64
-	for _, t := range temps {
-		if strings.Contains(t.SensorKey, "tdie") && t.Temperature > maxTdie {
-			maxTdie = t.Temperature
+	var cpuTemp float64
+	if len(temps) == 0 {
+		cpuTemp = 0
+	} else {
+		for _, t := range temps {
+			if strings.Contains(t.SensorKey, "tdie") && t.Temperature > cpuTemp {
+				cpuTemp = t.Temperature
+			}
 		}
 	}
 
 	return metrics.MetricsReceived{
 		CPUUsage:         cpuPercent,
 		MemoryUsageMB:    memUsedMB,
-		CPUTemperature:   maxTdie,
+		CPUTemperature:   cpuTemp,
 		MemoryPercentage: vmStat.UsedPercent,
 	}, nil
 }
