@@ -1,6 +1,9 @@
 package metrics
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 type MetricsDisplay struct {
 	metricsChan chan MetricsToDisplay
@@ -31,10 +34,17 @@ func (md *MetricsDisplay) LogMetrics() {
 			fmt.Printf("\033[%dA", prevRows)
 		}
 
-		// Print all metrics and count rows
+		// Sort host names
+		var hostNames []string
+		for name := range md.metricsMap {
+			hostNames = append(hostNames, name)
+		}
+		sort.Strings(hostNames)
+
+		// Print all metrics in order and count rows
 		rows := 0
-		for _, metric := range md.metricsMap {
-			printMetric(metric)
+		for _, name := range hostNames {
+			printMetric(md.metricsMap[name])
 			rows++
 		}
 
