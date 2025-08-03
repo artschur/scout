@@ -51,8 +51,26 @@ func (l *Hub) Run(ctx context.Context) {
 
 func (l *Hub) addConnection(conn *websocket.Connection) {
 	l.conns[conn] = true
-}
 
+	if conn.Role == "publisher" {
+		// Start goroutine to read metrics from this publisher
+		go func(c *websocket.Connection) {
+			for {
+				var metric metrics.MetricsReceived
+				err := c.Conn.ReadJSON(&metric)
+				if err != nil {
+					l.unregisterChan <- c
+					break
+				}
+				l.MetricsChan <- metrics.MetricsToDisplay{
+					MetricsReceived: metric,
+					Name:            c.Name,
+					IP:              c.IP,
+				}
+			}
+		}(conn)
+	}
+}
 func (l *Hub) removeConnection(conn *websocket.Connection) {
 	delete(l.conns, conn)
 	conn.Conn.Close()

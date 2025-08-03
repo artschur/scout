@@ -33,11 +33,10 @@ func (s *PublisherClient) Run(ctx context.Context) {
 		fmt.Println("Connection error:", err)
 		return
 	}
-	
+
 	defer conn.Close()
 	go metricsLoop(ctx, s.metrics)
 	for metric := range s.metrics {
-		fmt.Println("Sending metric:", metric)
 		if err := conn.WriteJSON(metric); err != nil {
 			fmt.Println("Error sending metric:", err)
 			break
