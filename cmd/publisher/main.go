@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"go-observability-tool/internal/publisher"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,5 +31,9 @@ func main() {
 		cancel()
 	}()
 
-	pub.Run(ctx)
+	if err := pub.Run(ctx); err != nil {
+		log.Printf("publisher stopped with error: %v", err)
+	} else {
+		log.Println("publisher stopped gracefully")
+	}
 }

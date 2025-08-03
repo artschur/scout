@@ -27,19 +27,26 @@ func NewPublisher(Config Config) (*PublisherClient, error) {
 	}, nil
 }
 
-func (s *PublisherClient) Run(ctx context.Context) {
+func (s *PublisherClient) Run(ctx context.Context) error {
 	conn, err := s.connectToSender()
 	if err != nil {
-		fmt.Println("Connection error:", err)
-		return
+		return fmt.Errorf("connection error: %w", err)
 	}
-
 	defer conn.Close()
+
 	go metricsLoop(ctx, s.metrics)
-	for metric := range s.metrics {
-		if err := conn.WriteJSON(metric); err != nil {
-			fmt.Println("Error sending metric:", err)
-			break
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case metric, ok := <-s.metrics:
+			if !ok {
+				return nil
+			}
+			if err := conn.WriteJSON(metric); err != nil {
+				return fmt.Errorf("error sending metric: %w", err)
+			}
 		}
 	}
 }
