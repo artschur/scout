@@ -1,9 +1,34 @@
 package main
 
-import "go-observability-tool/internal/publisher"
+import (
+	"context"
+	"go-observability-tool/internal/publisher"
+	"os"
+	"os/signal"
+	"syscall"
+)
 
 func main() {
-	// import from config afterwards
-	sender := publisher.NewPublisher("localhost:8082", "my-machine")
-	sender.Run()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	config := publisher.Config{
+		HostName:       "my-machine",
+		HubAddress:     "localhost:8082",
+		MetricInterval: 500,
+	}
+
+	pub, err := publisher.NewPublisher(config)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+		<-sig
+		cancel()
+	}()
+
+	pub.Run(ctx)
 }

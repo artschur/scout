@@ -1,4 +1,4 @@
-package observer
+package hub
 
 import (
 	"fmt"
@@ -10,10 +10,10 @@ import (
 )
 
 type MetricsHandler struct {
-	wsHub *websocket.Hub
+	wsHub *Hub
 }
 
-func NewMetricsHandler(Hub *websocket.Hub) *MetricsHandler {
+func NewMetricsHandler(Hub *Hub) *MetricsHandler {
 	return &MetricsHandler{
 		wsHub: Hub,
 	}
@@ -41,7 +41,7 @@ func (h *MetricsHandler) NewPublisher(w http.ResponseWriter, r *http.Request) {
 		Role: "publisher",
 	}
 
-	h.wsHub.AddConnection(newPublisher)
+	h.wsHub.registerChan <- newPublisher
 }
 
 // endpoint for a client (dashboard) that will get metrics from other sys

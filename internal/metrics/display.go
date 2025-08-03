@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"sort"
 )
@@ -17,47 +18,52 @@ func NewMetricsDisplay(metricsChan chan MetricsToDisplay) *MetricsDisplay {
 	}
 }
 
-func (md *MetricsDisplay) LogMetrics() {
+func (md *MetricsDisplay) LogMetrics(ctx context.Context) {
 	printHeader := true
 	var prevRows int
 
-	for metric := range md.metricsChan {
-		md.metricsMap[metric.Name] = metric
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case metric := <-md.metricsChan:
+			md.metricsMap[metric.Name] = metric
 
-		// Print header once
-		if printHeader {
-			fmt.Println("Name         | CPU    | CPU Temp | Memory (MB) | Memory (%)")
-			fmt.Println("-------------------------------------------------------------")
-			printHeader = false
-		} else if prevRows > 0 {
-			// Move cursor up to start of data rows
-			fmt.Printf("\033[%dA", prevRows)
-		}
+			// Print header once
+			if printHeader {
+				fmt.Println("Name         | CPU    | CPU Temp | Memory (MB) | Memory (%)")
+				fmt.Println("-------------------------------------------------------------")
+				printHeader = false
+			} else if prevRows > 0 {
+				// Move cursor up to start of data rows
+				fmt.Printf("\033[%dA", prevRows)
+			}
 
-		// Sort host names
-		var hostNames []string
-		for name := range md.metricsMap {
-			hostNames = append(hostNames, name)
-		}
-		sort.Strings(hostNames)
+			// Sort host names
+			var hostNames []string
+			for name := range md.metricsMap {
+				hostNames = append(hostNames, name)
+			}
+			sort.Strings(hostNames)
 
-		// Print all metrics in order and count rows
-		rows := 0
-		for _, name := range hostNames {
-			printMetric(md.metricsMap[name])
-			rows++
-		}
+			// Print all metrics in order and count rows
+			rows := 0
+			for _, name := range hostNames {
+				printMetric(md.metricsMap[name])
+				rows++
+			}
 
-		// If number of hosts decreased, clear extra lines
-		for i := rows; i < prevRows; i++ {
-			fmt.Print("\033[2K\n") // Clear line and move down
-		}
-		if rows < prevRows {
-			// Move cursor up to stay at the end of the table
-			fmt.Printf("\033[%dA", prevRows-rows)
-		}
+			// If number of hosts decreased, clear extra lines
+			for i := rows; i < prevRows; i++ {
+				fmt.Print("\033[2K\n") // Clear line and move down
+			}
+			if rows < prevRows {
+				// Move cursor up to stay at the end of the table
+				fmt.Printf("\033[%dA", prevRows-rows)
+			}
 
-		prevRows = rows
+			prevRows = rows
+		}
 	}
 }
 

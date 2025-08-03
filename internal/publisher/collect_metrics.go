@@ -1,6 +1,7 @@
 package publisher
 
 import (
+	"context"
 	"fmt"
 	"go-observability-tool/internal/metrics"
 	"strings"
@@ -11,15 +12,21 @@ import (
 	"github.com/shirou/gopsutil/v4/sensors"
 )
 
-func metricsLoop(metricsChan chan metrics.MetricsReceived) {
+func metricsLoop(ctx context.Context, metricsChan chan metrics.MetricsReceived) {
 	ticker := time.NewTicker(500 * time.Millisecond)
-	for range ticker.C {
-		metrics, err := getMetrics()
-		if err != nil {
-			fmt.Printf("Error getting metrics: %v\n", err)
-			continue
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			metrics, err := getMetrics()
+			if err != nil {
+				fmt.Printf("Error getting metrics: %v\n", err)
+				continue
+			}
+			metricsChan <- metrics
 		}
-		metricsChan <- metrics
 	}
 }
 
