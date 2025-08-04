@@ -3,7 +3,7 @@ package publisher
 import (
 	"context"
 	"fmt"
-	"go-observability-tool/internal/metrics"
+	"scout/internal/metrics"
 
 	"github.com/gorilla/websocket"
 )

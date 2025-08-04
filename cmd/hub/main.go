@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"go-observability-tool/internal/hub"
-	"go-observability-tool/internal/metrics"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"scout/internal/hub"
+	"scout/internal/metrics"
 	"syscall"
 )
 

@@ -2,9 +2,9 @@ package hub
 
 import (
 	"fmt"
-	"go-observability-tool/internal/websocket"
 	"log"
 	"net/http"
+	"scout/internal/websocket"
 
 	gw "github.com/gorilla/websocket"
 )

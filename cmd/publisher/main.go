@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"go-observability-tool/internal/publisher"
 	"log"
 	"os"
 	"os/signal"
+	"scout/internal/publisher"
 	"syscall"
 )
 

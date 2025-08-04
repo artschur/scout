@@ -2,8 +2,8 @@ package hub
 
 import (
 	"context"
-	"go-observability-tool/internal/metrics"
-	"go-observability-tool/internal/websocket"
+	"scout/internal/metrics"
+	"scout/internal/websocket"
 )
 
 type Hub struct {
@@ -65,7 +65,7 @@ func (l *Hub) addConnection(conn *websocket.Connection) {
 				l.MetricsChan <- metrics.MetricsToDisplay{
 					MetricsReceived: metric,
 					Name:            c.Name,
-					IP:              c.IP,
+					Ip:              c.IP,
 				}
 			}
 		}(conn)
